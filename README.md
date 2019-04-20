@@ -3,5 +3,9 @@
 
 ## Contributors
 Max
+
 Brigham
+
 Anjali
+
+Aidan
