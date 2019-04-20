@@ -1,0 +1,358 @@
+<html lang="en">
+<head>
+  <style>
+      /* Always set the map height explicitly to define the size of the div
+      * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+  </style>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <!-- Compiled and minified CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <title>GameGuidez</title>
+</head>
+<body class="grey lighten-3" >
+
+  <!-- NAVBAR -->
+  <nav class="z-depth-0 grey lighten-4">
+    <div class="nav-wrapper container">
+      <a href="#" class="brand-logo">
+         <img src="Nonprofit Full-05.png" style="width: 160px; margin-top: 5px;"> 
+      </a>
+      <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li class="logged-in">
+            <a href="#" class="grey-text modal-trigger" data-target="modal-account">Account</a>
+          </li>
+          <li class="logged-in">
+            <a href="#" class="grey-text" id="logout">Logout</a>
+          </li>
+          <li class="logged-in">
+            <a href="#" class="grey-text modal-trigger" data-target="modal-create">Create Guide</a>
+          </li>
+          <li class="logged-out">
+            <a href="#" class="grey-text modal-trigger" data-target="modal-login">Login</a>
+          </li>
+          <li class="logged-out">
+            <a href="#" class="grey-text modal-trigger" data-target="modal-signup">Sign up</a>
+          </li>
+        </span>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- SIGN UP MODAL -->
+  <div id="modal-signup" class="modal">
+    <div class="modal-content">
+      <h4>Sign up</h4><br />
+      <form id="signup-form">
+        <div class="input-field">
+          <input type="email" id="signup-email" required />
+          <label for="signup-email">Email address</label>
+        </div>
+        <div class="input-field">
+          <input type="password" id="signup-password" required />
+          <label for="signup-password">Choose password</label>
+        </div>
+        <button class="btn yellow darken-2 z-depth-0">Sign up</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- LOGIN MODAL -->
+  <div id="modal-login" class="modal">
+    <div class="modal-content">
+      <h4>Login</h4><br />
+      <form id="login-form">
+        <div class="input-field">
+          <input type="email" id="login-email" required />
+          <label for="login-email">Email address</label>
+        </div>
+        <div class="input-field">
+          <input type="password" id="login-password" required />
+          <label for="login-password">Your password</label>
+        </div>
+        <button class="btn yellow darken-2 z-depth-0">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ACCOUNT MODAL -->
+  <div id="modal-account" class="modal">
+    <div class="modal-content center-align">
+      <h4>Account details</h4><br />
+      <div class="account-details"></div>
+    </div>
+  </div>
+
+  <!-- CREATE GUIDE MODAL -->
+  <div id="modal-create" class="modal">
+    <div class="modal-content">
+      <h4>Create Guide</h4><br />
+      <form id="create-form">
+        <div class="input-field">
+          <input type="text" id="title" required>
+          <label for="title">Guide Title</label>
+        </div>
+        <div class="input-field">
+          <textarea id="content" class="materialize-textarea" required></textarea>
+          <label for="content">Guide Content</label>
+        </div>
+        <button class="btn yellow darken-2 z-depth-0">Create</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- GUIDE LIST -->
+  <div class="container" style="margin-top: 40px;">
+    <ul class="collapsible z-depth-0 guides" style="border: none;">
+      <li>
+        <div class="collapsible-header grey lighten-4">Guide title</div>
+        <div class="collapsible-body white">Lorem ipsum dolor sit amet.</div>
+      </li>
+      <li>
+        <div class="collapsible-header grey lighten-4">Guide title</div>
+        <div class="collapsible-body white"><span>Lorem ipsum dolor sit amet.</span></div>
+      </li>
+      <li>
+        <div class="collapsible-header grey lighten-4">Guide title</div>
+        <div class="collapsible-body white"><span>Lorem ipsum dolor sit amet.</span></div>
+      </li>
+      <li>
+        <div class="collapsible-header grey lighten-4">Guide title</div>
+        <div class="collapsible-body white"><span>Lorem ipsum dolor sit amet.</span></div>
+      </li>
+    </ul>
+  </div>
+
+
+  <!-- MAP HTML -->
+  <div id="map"></div>
+      <!-- Replace the value of the key parameter with your own API key. -->
+      <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8hb2eS6GpwPTWkJ6T-na2SMGDAwFmC24&libraries=visualization&callback=initMap" async defer></script> -->
+      <script src="https://maps.googleapis.com/maps/api/geocode/json?address=3004+Mission+St,+Santa+Cruz,+CA&key=AIzaSyD8hb2eS6GpwPTWkJ6T-na2SMGDAwFmC24" async defer></script>
+	  <script src="https://cdn.firebase.com/js/client/2.3.2/firebase.js"></script>
+
+  <script>
+      /**
+      * Reference to Firebase database.
+      * @const
+      */
+      var firebase = new Firebase('https://fire-map-tutorial.firebaseio.com/');
+
+      /**
+      * Data object to be written to Firebase.
+      */
+      var data = {
+        sender: null,
+        timestamp: null,
+        lat: null,
+        lng: null
+      };
+
+      function makeInfoBox(controlDiv, map) {
+        // Set CSS for the control border.
+        var controlUI = document.createElement('div');
+        controlUI.style.boxShadow = 'rgba(0, 0, 0, 0.298039) 0px 1px 4px -1px';
+        controlUI.style.backgroundColor = '#fff';
+        controlUI.style.border = '2px solid #fff';
+        controlUI.style.borderRadius = '2px';
+        controlUI.style.marginBottom = '22px';
+        controlUI.style.marginTop = '10px';
+        controlUI.style.textAlign = 'center';
+        controlDiv.appendChild(controlUI);
+
+        // Set CSS for the control interior.
+        var controlText = document.createElement('div');
+        controlText.style.color = 'rgb(25,25,25)';
+        controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
+        controlText.style.fontSize = '100%';
+        controlText.style.padding = '6px';
+        controlText.textContent = 'The map shows all clicks made in the last 10 minutes.';
+        controlUI.appendChild(controlText);
+      }
+
+      /**
+      * Starting point for running the program. Authenticates the user.
+      * @param {function()} onAuthSuccess - Called when authentication succeeds.
+      */
+      function initAuthentication(onAuthSuccess) {
+        firebase.authAnonymously(function(error, authData) {
+          if (error) {
+            console.log('Login Failed!', error);
+          } else {
+            data.sender = authData.uid;
+            onAuthSuccess();
+          }
+        }, {remember: 'sessionOnly'});  // Users will get a new id for every session.
+      }
+
+      /**
+       * Creates a map object with a click listener and a heatmap.
+       */
+      function initMap() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: 0, lng: 0},
+          zoom: 3,
+          styles: [{
+            featureType: 'poi',
+            stylers: [{ visibility: 'off' }]  // Turn off POI.
+          },
+          {
+            featureType: 'transit.station',
+            stylers: [{ visibility: 'off' }]  // Turn off bus, train stations etc.
+          }],
+          disableDoubleClickZoom: true,
+          streetViewControl: false,
+        });
+
+        // Create the DIV to hold the control and call the makeInfoBox() constructor
+        // passing in this DIV.
+        var infoBoxDiv = document.createElement('div');
+        makeInfoBox(infoBoxDiv, map);
+        map.controls[google.maps.ControlPosition.TOP_CENTER].push(infoBoxDiv);
+
+        // Listen for clicks and add the location of the click to firebase.
+        map.addListener('click', function(e) {
+          data.lat = e.latLng.lat();
+          data.lng = e.latLng.lng();
+          addToFirebase(data);
+        });
+
+        // Create a heatmap.
+        var heatmap = new google.maps.visualization.HeatmapLayer({
+          data: [],
+          map: map,
+          radius: 16
+        });
+
+        initAuthentication(initFirebase.bind(undefined, heatmap));
+      }
+
+      /**
+       * Set up a Firebase with deletion on clicks older than expirySeconds
+       * @param {!google.maps.visualization.HeatmapLayer} heatmap The heatmap to
+       * which points are added from Firebase.
+       */
+      function initFirebase(heatmap) {
+
+        // 10 minutes before current time.
+        var startTime = new Date().getTime() - (60 * 10 * 1000);
+
+        // Reference to the clicks in Firebase.
+        var clicks = firebase.child('clicks');
+
+        // Listener for when a click is added.
+        clicks.orderByChild('timestamp').startAt(startTime).on('child_added',
+          function(snapshot) {
+
+            // Get that click from firebase.
+            var newPosition = snapshot.val();
+            var point = new google.maps.LatLng(newPosition.lat, newPosition.lng);
+            var elapsed = new Date().getTime() - newPosition.timestamp;
+
+            // Add the point to  the heatmap.
+            heatmap.getData().push(point);
+
+            // Requests entries older than expiry time (10 minutes).
+            var expirySeconds = Math.max(60 * 10 * 1000 - elapsed, 0);
+            // Set client timeout to remove the point after a certain time.
+            window.setTimeout(function() {
+              // Delete the old point from the database.
+              snapshot.ref().remove();
+            }, expirySeconds);
+          }
+        );
+
+        // Remove old data from the heatmap when a point is removed from firebase.
+        clicks.on('child_removed', function(snapshot, prevChildKey) {
+          var heatmapData = heatmap.getData();
+          var i = 0;
+          while (snapshot.val().lat != heatmapData.getAt(i).lat()
+            || snapshot.val().lng != heatmapData.getAt(i).lng()) {
+            i++;
+          }
+          heatmapData.removeAt(i);
+        });
+      }
+
+      /**
+       * Updates the last_message/ path with the current timestamp.
+       * @param {function(Date)} addClick After the last message timestamp has been updated,
+       *     this function is called with the current timestamp to add the
+       *     click to the firebase.
+       */
+      function getTimestamp(addClick) {
+        // Reference to location for saving the last click time.
+        var ref = firebase.child('last_message/' + data.sender);
+
+        ref.onDisconnect().remove();  // Delete reference from firebase on disconnect.
+
+        // Set value to timestamp.
+        ref.set(Firebase.ServerValue.TIMESTAMP, function(err) {
+          if (err) {  // Write to last message was unsuccessful.
+            console.log(err);
+          } else {  // Write to last message was successful.
+            ref.once('value', function(snap) {
+              addClick(snap.val());  // Add click with same timestamp.
+            }, function(err) {
+              console.warn(err);
+            });
+          }
+        });
+      }
+
+      /**
+       * Adds a click to firebase.
+       * @param {Object} data The data to be added to firebase.
+       *     It contains the lat, lng, sender and timestamp.
+       */
+      function addToFirebase(data) {
+        getTimestamp(function(timestamp) {
+          // Add the new timestamp to the record data.
+          data.timestamp = timestamp;
+          var ref = firebase.child('clicks').push(data, function(err) {
+            if (err) {  // Data was not written to firebase.
+              console.warn(err);
+            }
+          });
+        });
+      }
+    </script>
+
+  <script src="https://www.gstatic.com/firebasejs/5.10.0/firebase.js"></script>
+  <script>
+    // Initialize Firebase
+    var config = {
+      apiKey: "AIzaSyCs7LZFLguM2-1-uidaLL5i5XvRozSHQnA",
+      authDomain: "nonprofit-d44a2.firebaseapp.com",
+      databaseURL: "https://nonprofit-d44a2.firebaseio.com",
+      projectId: "nonprofit-d44a2",
+      storageBucket: "nonprofit-d44a2.appspot.com",
+      messagingSenderId: "521912192208"
+    };
+    firebase.initializeApp(config);
+
+    // Make auth and firestore references
+    const auth = firebase.auth();
+    const db = firebase.firestore(); 
+
+    // Update firestore settings
+    db.settings({ timestampsInSnapshots: true });
+  </script>
+  
+  <!-- Compiled and minified JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script src="scripts/auth.js"></script>
+  <script src="scripts/index.js"></script>
+</body>
+</html>
