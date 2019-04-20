@@ -12,8 +12,12 @@
         margin: 0;
         padding: 0;
       }
-  </style>
 
+      nav {
+        font-family: 'Karla', sans-serif;
+      }
+  </style>
+ <link href="https://fonts.googleapis.com/css?family=Karla" rel="stylesheet">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -27,7 +31,7 @@
   <nav class="z-depth-0 grey lighten-4">
     <div class="nav-wrapper container">
       <a href="#" class="brand-logo">
-         <img src="Nonprofit Full-05.png" style="width: 160px; margin-top: 5px;"> 
+         <img src="Nonprofit Full-05.png" style="width: 160px; margin-top: 5px;">
       </a>
       <ul id="nav-mobile" class="right hide-on-med-and-down">
           <li class="logged-in">
@@ -136,13 +140,25 @@
 
 
   <!-- MAP HTML -->
-  <div id="map"></div>
-      <!-- Replace the value of the key parameter with your own API key. -->
-      <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8hb2eS6GpwPTWkJ6T-na2SMGDAwFmC24&libraries=visualization&callback=initMap" async defer></script>
-      <script src="https://cdn.firebase.com/js/client/2.3.2/firebase.js"></script>
+	<!--The div element for the map -->
+	<div id="map"></div>
+		<!-- Replace the value of the key parameter with your own API key. -->
+		<script async defer
+		src="https://maps.googleapis.com/maps/api/js?address=Santa+Cruz,+CA&key=AIzaSyD8hb2eS6GpwPTWkJ6T-na2SMGDAwFmC24&callback=initMap">
+		</script>
 
   <script>
 <<<<<<< HEAD
+	// Initialize and add the map
+	function initMap() {
+	  // The location of santacruz
+	  var sc = {lat: 36.974117, lng: -122.030792 };
+		// The map, centered at Uluru
+	  var map = new google.maps.Map(
+      document.getElementById('map'), {zoom: 4, center: sc});
+      // The marker, positioned at Uluru
+      var marker = new google.maps.Marker({position: sc, map: map});
+	}
 =======
       /**
       * Reference to Firebase database.
