@@ -12,8 +12,12 @@
         margin: 0;
         padding: 0;
       }
-  </style>
 
+      nav {
+        font-family: 'Karla', sans-serif;
+      }
+  </style>
+ <link href="https://fonts.googleapis.com/css?family=Karla" rel="stylesheet">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -27,7 +31,7 @@
   <nav class="z-depth-0 grey lighten-4">
     <div class="nav-wrapper container">
       <a href="#" class="brand-logo">
-         <img src="img/logo.svg" style="width: 180px; margin-top: 10px;"> 
+         <img src="img/logo2-03.png" style="width: 180px; margin-top: 10px;">
       </a>
       <ul id="nav-mobile" class="right hide-on-med-and-down">
           <li class="logged-in">
@@ -343,12 +347,12 @@
 
     // Make auth and firestore references
     const auth = firebase.auth();
-    const db = firebase.firestore(); 
+    const db = firebase.firestore();
 
     // Update firestore settings
     db.settings({ timestampsInSnapshots: true });
   </script>
-  
+
   <!-- Compiled and minified JavaScript -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   <script src="scripts/auth.js"></script>
