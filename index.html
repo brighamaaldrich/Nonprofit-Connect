@@ -156,12 +156,53 @@
 	// Initialize and add the map
 	function initMap() {
 	  // The location of santacruz
-	  var sc = {lat: 36.974117, lng: -122.030792 };
+	  var sc = {lat: 36.9585, lng:  -122.0173 };
+	  var ucsc = {lat: 36.9881, lng:  -122.0582 };
 		// The map, centered at Uluru
 	  var map = new google.maps.Map(
       document.getElementById('map'), {zoom: 13, center: sc});
       // The marker, positioned at Uluru
-      var marker = new google.maps.Marker({position: sc, map: map});
+      var contentString = '<div id="content">'+
+            '<div id="siteNotice">'+
+            '</div>'+
+            '<h3 id="firstHeading" class="firstHeading">Beach Cleanup</h3>'+
+            '<div id="bodyContent">'+
+            '<p>Save Our Shores is hosting a beach cleanup on May 31st from 3:00pm to 6:00pm. Meet on the wharf!</p>'+
+            '</div>'+
+            '</div>';
+
+        var infowindow = new google.maps.InfoWindow({
+          content: contentString
+        });
+		
+		
+	  var marker = new google.maps.Marker({position: sc, map: map, title: 'Beach Cleanup'});
+	  marker.addListener('mouseover', function(){
+		infowindow.open(map, marker);
+	  });
+	  marker.addListener('mouseout', function(){
+		infowindow.close(map, marker);
+	  });
+	  
+	  var contentString2 = '<div id="content">'+
+            '<div id="siteNotice">'+
+            '</div>'+
+            '<h3 id="firstHeading" class="firstHeading">Hackathon Mentoring</h3>'+
+            '<div id="bodyContent">'+
+            '<p>The UCSC Banana Slugs are looking for volunteers to mentor highschool students at the UCSC hackathon on April 20th from 9:30am to 8:00pm.</p>'+
+            '</div>'+
+            '</div>';
+
+        var infowindow2 = new google.maps.InfoWindow({
+          content: contentString2
+        });
+	  var marker2 = new google.maps.Marker({position: ucsc, map: map, title: 'Hackathon Mentoring'});
+	  marker2.addListener('mouseover', function(){
+		infowindow2.open(map, marker2);
+	  });
+	  marker2.addListener('mouseout', function(){
+		infowindow2.close(map, marker2);
+	  });
 	}
  </script>
 
