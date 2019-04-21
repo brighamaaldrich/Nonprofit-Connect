@@ -1,49 +1,67 @@
 // DOM elements
 const postList = document.querySelector('.posts');
-const loggedOutLinks = document.querySelectorAll(".logged-out");
-const loggedInLinks = document.querySelectorAll(".logged-in");
+const loggedOutLinks = document.querySelectorAll('.logged-out');
+const loggedInLinks = document.querySelectorAll('.logged-in');
+const accountDetails = document.querySelector('.account-details');
 
-const setupUI = user => {
-  if(user) {
-    // Toggle UI elements
-    loggedInLinks.forEach(item => {
-      item.style.display = "block";
+const setupUI = (user) => {
+  if (user) {
+    // account info
+    db.collection('users').doc(user.uid).get().then(doc => {
+      const html = `
+        <div>Logged in as ${user.email}</div>
+        <div>${doc.data().bio}</div>
+      `;
+      accountDetails.innerHTML = html;
     });
-    loggedOutLinks.forEach(item => {
-      item.style.display = "none";
-    });
+    // toggle user UI elements
+    loggedInLinks.forEach(item => item.style.display = 'block');
+    loggedOutLinks.forEach(item => item.style.display = 'none');
   } else {
-    loggedInLinks.forEach(item => {
-      item.style.display = "none";
-    });
-    loggedOutLinks.forEach(item => {
-      item.style.display = "block";
-    });
+    // clear account info
+    accountDetails.innerHTML = '';
+    // toggle user elements
+    loggedInLinks.forEach(item => item.style.display = 'none');
+    loggedOutLinks.forEach(item => item.style.display = 'block');
   }
-}
+};
 
-// Setup posts
-const setupPosts = (data) => {
+// setup guides
+const setupPosts = (data, user) => {
 
-  if(data.length) {
+  console.log(user);
+  if(!user) {
+    postList.innerHTML = '<h5 class="center-align">Please sign in!</h5>'; // There is no user
+    return;
+  }
+  if (data.length) { // There are posts and user
     let html = '';
     data.forEach(doc => {
       const post = doc.data();
       const li = `
-      <li>
-        <div class="collapsible-header grey lighten-4"> ${post.title} </div>
-        <div class="collapsible-body white"> ${post.content} </div>
-      </li>
-    `;
+        <li>
+          <div class="collapsible-header grey lighten-4"> ${post.title} </div>
+          <div class="collapsible-body white"> ${post.content} </br></br> <a class='btn yellow darken-2 help-btn'>I want to help</a> </br>
+          There are ${post.helperCount} people helping at this community service event! </br> including users ....
+          </div>
+
+        </li>
+      `;
       html += li;
     });
     postList.innerHTML = html
   } else {
-    postList.innerHTML = "<h5 class = 'center-align'>Login to view posts</h5>"
+    postList.innerHTML = '<h5 class="center-align">There are no posts</h5>'; // There is no user
   }
-
 };
-// Setup materialize components
+
+const rsvp = (user) => {
+  if(user) {
+
+  }
+}
+
+// setup materialize components
 document.addEventListener('DOMContentLoaded', function() {
 
   var modals = document.querySelectorAll('.modal');

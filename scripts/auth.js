@@ -1,62 +1,90 @@
-// Listen for auth state changes
+// listen for auth status changes
 auth.onAuthStateChanged(user => {
-    console.log(user);
-    if(user) {
-        console.log("User is logged in: ", user);
-        // Get data
-        db.collection("posts").get().then(snapshot => {
-            console.log(snapshot.docs);
-            setupPosts(snapshot.docs);
-            setupUI(user);
+  const currentUser = auth.currentUser;
+  // console.log(currentUser.email);
+  // console.log(user.email);
+  if (user) {
+    console.log("Here")
+    db.collection('posts').onSnapshot(snapshot => {
+      setupPosts(snapshot.docs, user);
+      document.querySelectorAll(".help-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          M.toast({html: 'You have signed up to help!'})
+          rsvp(user);
         });
-    } else {
-        console.log("User logged out!");
-        setupUI();
-        setupPosts([]);
-    }
-});
-// Signup
-const signupForm = document.querySelector("#signup-form");
-signupForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    // Get user info
-    const email = signupForm["signup-email"].value;
-    const password = signupForm["signup-password"].value;
-    console.log(email, password);
-
-    // Signup the user
-    auth.createUserWithEmailAndPassword(email, password).then(cred => {
-        console.log(cred.user);
-        const modal = document.querySelector("#modal-signup");
+      });
+      setupUI(user);
+    }, err => console.log(err.message));
+    // create new post
+    const createForm = document.querySelector('#create-form');
+    createForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      console.log(currentUser);
+      db.collection('posts').add({
+        title: createForm.title.value,
+        content: createForm.content.value,
+        helpers: [ currentUser.uid ],
+        helperCount: 1
+      }).then(() => {
+        // close the create modal & reset form
+        const modal = document.querySelector('#modal-create');
         M.Modal.getInstance(modal).close();
-        signupForm.reset()
+        createForm.reset();
+      }).catch(err => {
+        console.log(err.message);
+      });
     });
+  } else {
+    setupUI();
+    setupPosts([], user);
+  }
 });
 
-// Logout
-const logout = document.querySelector("#logout");
-logout.addEventListener("click", (e) => {
-    e.preventDefault();
-    auth.signOut().then(() => {
-        console.log("User has signed out!");
+
+// signup
+const signupForm = document.querySelector('#signup-form');
+signupForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  // get user info
+  const email = signupForm['signup-email'].value;
+  const password = signupForm['signup-password'].value;
+
+  // sign up the user & add firestore data
+  auth.createUserWithEmailAndPassword(email, password).then(cred => {
+    return db.collection('users').doc(cred.user.uid).set({
+      bio: signupForm['signup-bio'].value
     });
+  }).then(() => {
+    // close the signup modal & reset form
+    const modal = document.querySelector('#modal-signup');
+    M.Modal.getInstance(modal).close();
+    signupForm.reset();
+  });
 });
 
-// Login
-const loginForm = document.querySelector("#login-form");
-loginForm.addEventListener("submit", (e) => {
-    e.preventDefault();
+// logout
+const logout = document.querySelector('#logout');
+logout.addEventListener('click', (e) => {
+  e.preventDefault();
+  auth.signOut();
+});
 
-    // Get user info
-    const email = loginForm["login-email"].value;
-    const password = loginForm["login-password"].value;
+// login
+const loginForm = document.querySelector('#login-form');
+loginForm.addEventListener('submit', (e) => {
+  e.preventDefault();
 
-    auth.signInWithEmailAndPassword(email, password).then(cred => {
-        console.log(cred.user);
-        // Close the login modal and reset the form
-        const modal = document.querySelector("#modal-login");
-        M.Modal.getInstance(modal).close();
-        loginForm.reset()
-    })
+  // get user info
+  const email = loginForm['login-email'].value;
+  const password = loginForm['login-password'].value;
+
+  // log the user in
+  auth.signInWithEmailAndPassword(email, password).then((cred) => {
+    // close the signup modal & reset form
+    const modal = document.querySelector('#modal-login');
+    M.Modal.getInstance(modal).close();
+    loginForm.reset();
+  });
+
 });
